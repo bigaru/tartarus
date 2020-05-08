@@ -1,12 +1,16 @@
 package `in`.abaddon.tartarus.unholycurry
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
+import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.tools.Diagnostic
+import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
+import kotlin.reflect.jvm.internal.impl.name.FqName
 
 @SupportedAnnotationTypes("in.abaddon.tartarus.unholycurry.*")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -42,13 +46,28 @@ class CurryProcessor: AbstractProcessor(){
         return true
     }
 
-    // workaround kotlin string
-    fun TypeName.correctStringType() =
-        if (this.toString() == "java.lang.String") ClassName("kotlin", "String") else this
-
+    // workaround kotlin string/list -> https://github.com/square/kotlinpoet/issues/236
+    fun TypeName.javaToKotlinType(): TypeName {
+        return when (this) {
+            is ParameterizedTypeName -> {
+                (rawType.javaToKotlinType() as ClassName).parameterizedBy(*(typeArguments.map { it.javaToKotlinType() }.toTypedArray()))
+            }
+            is WildcardTypeName -> {
+                outTypes[0].javaToKotlinType()
+            }
+            else -> {
+                val className = JavaToKotlinClassMap.INSTANCE.mapJavaToKotlin(FqName(toString()))?.asSingleFqName()?.asString()
+                return if (className == null) {
+                    this
+                } else {
+                    ClassName.bestGuess(className)
+                }
+            }
+        }
+    }
 
     private fun makeParam(p: VariableElement): ParameterSpec{
-        return ParameterSpec.builder(p.simpleName.toString(), p.asType().asTypeName().correctStringType()).build()
+        return ParameterSpec.builder(p.simpleName.toString(), p.asType().asTypeName().javaToKotlinType()).build()
     }
 
     private fun printFiles(methodBuffer: List<ExecutableElement>){
