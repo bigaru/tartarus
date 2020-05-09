@@ -11,8 +11,22 @@ object Main {
 
 class Foo(){
     @Curry
+    val lambda = {a: String, b:String -> a + b}
+
+    //@Curry
+    var _s = ""
+
+    var s: String
+        get() = _s
+        set(value){_s = value}
+
+    @Curry
     fun uncurried(a: String, b: Int, c: List<List<String>>, d: Boolean, e: Double){
         println("->>> $a $b $c $d $e <<<-")
     }
 
 }
+
+// TODO How to handle?
+//@Curry
+fun no(s: Int, s2: Int, s3: Int){}

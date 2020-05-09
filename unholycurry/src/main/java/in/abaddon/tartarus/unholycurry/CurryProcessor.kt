@@ -4,6 +4,7 @@ import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
+import javax.lang.model.element.VariableElement
 import javax.tools.Diagnostic
 
 @SupportedAnnotationTypes("in.abaddon.tartarus.unholycurry.Curry")
@@ -17,13 +18,28 @@ class CurryProcessor: AbstractProcessor(){
     private val fileWriter = FileWriter()
 
     private fun log(msg: String){
-        processingEnv.messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, msg)
+        processingEnv.messager.printMessage(Diagnostic.Kind.WARNING, msg)
+    }
+
+    private fun error(msg: String){
+        processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, msg)
     }
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment?): Boolean {
-        val methods = annotations?.flatMap { roundEnv?.getElementsAnnotatedWith(it) ?: emptySet() }
-                                 ?.filterIsInstance<ExecutableElement>() ?: emptyList()
+        val elements = annotations?.flatMap { roundEnv?.getElementsAnnotatedWith(it) ?: emptySet() }
 
+        val methods = elements
+                        ?.filterIsInstance<ExecutableElement>()
+                        ?: emptyList()
+        val lambdas = elements
+                        ?.filterIsInstance<VariableElement>()
+                        ?.filter(this::isLambda)
+                        ?: emptyList()
+
+        elements
+            ?.filterIsInstance<VariableElement>()
+            ?.filterNot(this::isLambda)
+            ?.forEach{error("${it.simpleName} is NOT a lambda")}
 
         if(methods.isNotEmpty()) {
             fileWriter.makeCurries(processingEnv.filer, methods)
@@ -31,5 +47,8 @@ class CurryProcessor: AbstractProcessor(){
 
         return true
     }
+
+    private fun isLambda(e: VariableElement) =
+        e.asType().toString().startsWith("kotlin.jvm.functions.")
 
 }

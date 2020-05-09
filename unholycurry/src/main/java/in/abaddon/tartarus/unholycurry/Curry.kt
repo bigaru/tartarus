@@ -1,5 +1,5 @@
 package `in`.abaddon.tartarus.unholycurry
 
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 annotation class Curry
