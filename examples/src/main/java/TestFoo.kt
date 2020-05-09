@@ -17,4 +17,9 @@ class TestFoo {
     fun methodGeneric(a1: List<String>, a2: List<String>): String {
         return "$a1 | $a2 "
     }
+
+    @Curry
+    fun methodNestedGeneric(a1: List<List<String>>, a2: List<List<String>>): String {
+        return "$a1 | $a2 "
+    }
 }
