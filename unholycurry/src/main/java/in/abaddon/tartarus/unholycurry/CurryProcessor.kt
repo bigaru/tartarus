@@ -43,17 +43,12 @@ class CurryProcessor: AbstractProcessor(), WithHelper{
             ?.filterNot(this::isLambda)
             ?.forEach{error("${it.simpleName} is NOT a lambda")}
 
-        lambdas.forEach {
-            val tn = it.asType().makeType()
-            log("\n"+it)
-
-            if(tn is ParameterizedTypeName){
-                log("\n"+tn.typeArguments)
-            }
+        methods.forEach {
+           // log("\n "+it)
         }
 
-        if(methods.isNotEmpty()) {
-            fileWriter.makeCurries(processingEnv.filer, methods, lambdas)
+        if(methods.isNotEmpty() || lambdas.isNotEmpty()) {
+            fileWriter.makeCurries(processingEnv.filer, methods, lambdas, processingEnv.messager)
         }
 
         return true

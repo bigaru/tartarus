@@ -2,6 +2,7 @@ package `in`.abaddon.tartarus.unholycurry
 
 import com.squareup.kotlinpoet.*
 import javax.annotation.processing.Filer
+import javax.annotation.processing.Messager
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
@@ -26,7 +27,7 @@ class FileWriter: WithHelper {
         ps.map{it.name()}
           .fold("this.${originalName}($args)") {acc, s -> "{$s -> $acc}"}
 
-    private fun makeCurriedMethod(element: ExecutableElement): FunSpec {
+    private fun cookMethodCurry(element: ExecutableElement): FunSpec {
         val firstParam = element.parameters.first()
         val tailParam = element.parameters.drop(1).reversed()
 
@@ -45,7 +46,7 @@ class FileWriter: WithHelper {
             .build()
     }
 
-    private fun makeCurriedLambda(element: VariableElement): FunSpec {
+    private fun cookLambdaCurry(element: VariableElement): FunSpec {
         val type = element.asType().makeType() as ParameterizedTypeName
 
         val params = type.typeArguments.dropLast(1).mapIndexed{idx, t -> idx to t}
@@ -73,16 +74,40 @@ class FileWriter: WithHelper {
             .build()
     }
 
-    fun makeCurries(filer: Filer, methods: List<ExecutableElement>, lambdas: List<VariableElement>){
-        // TODO produce in separate package / interface aka mixin
-        val fileBuilder = FileSpec.builder("", "CurriedExtensions")
+    private fun getPackageName(classElement: TypeElement): String {
+        val lastIndex: Int = classElement.qualifiedName.toString().lastIndexOf('.')
 
-        methods.map(this::makeCurriedMethod)
-               .forEach { fileBuilder.addFunction(it) }
+        return if (lastIndex != -1) {
+            classElement.qualifiedName.toString().substring(0, lastIndex)
+        }
+        else ""
+    }
 
-        lambdas.map(this::makeCurriedLambda)
-               .forEach { fileBuilder.addFunction(it) }
+    fun makeCurries(filer: Filer, methods: List<ExecutableElement>, lambdas: List<VariableElement>, logger: Messager){
+        val curriedMethods = methods.groupBy { it.enclosingElement }
+                                    .mapValues { it.value.map(this::cookMethodCurry) }
 
-        fileBuilder.build().writeTo(filer)
+        val curriedLambdas = lambdas.groupBy { it.enclosingElement }
+                                    .mapValues { it.value.map(this::cookLambdaCurry) }
+
+        val keys = curriedMethods.keys + curriedLambdas.keys
+
+        keys.map {
+            val m = curriedMethods[it] ?: emptyList()
+            val l = curriedLambdas[it] ?: emptyList()
+            it to (m+l)
+        }
+        .forEach {
+            val packageName = getPackageName(it.first as TypeElement)
+            val interfaceName = "${it.first.name()}Curried"
+            val interfaceSpec = TypeSpec.interfaceBuilder(interfaceName)
+
+            it.second.forEach { interfaceSpec.addFunction(it) }
+
+            FileSpec.builder(packageName, interfaceName)
+                .addType(interfaceSpec.build())
+                .build()
+                .writeTo(filer)
+        }
     }
 }

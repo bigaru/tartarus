@@ -1,6 +1,6 @@
 import `in`.abaddon.tartarus.unholycurry.Curry
 
-object Main {
+object Main: FooCurried {
     @JvmStatic
     fun main(args: Array<String>) {
         val foo = Foo()
