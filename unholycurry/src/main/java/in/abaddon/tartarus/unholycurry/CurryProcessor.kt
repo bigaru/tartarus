@@ -4,7 +4,6 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
-import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
@@ -79,7 +78,7 @@ class CurryProcessor: AbstractProcessor(){
         val tailParam = method.parameters.drop(1).reversed()
 
         val finalType = tailParam.map{makeParam(it)}
-                                 .fold(method.returnType.asTypeName()) {acc, p -> LambdaTypeName.get(returnType = acc, parameters = listOf(p))}
+                                 .fold(method.returnType.asTypeName().javaToKotlinType()) {acc, p -> LambdaTypeName.get(returnType = acc, parameters = listOf(p))}
 
         val args = method.parameters.map{it.simpleName.toString()}
                                     .reduce{acc, a -> "$acc, $a"}
