@@ -6,12 +6,15 @@ object Main {
         val foo = Foo()
         foo.uncurried("a",2, emptyList(), false, 2.0)
         foo.uncurried("a")(2)(emptyList())(false)( 2.0)
+
+        foo.lambda("a","b")
+        foo.lambda("a")("b")
     }
 }
 
 class Foo(){
     @Curry
-    val lambda = {a: String, b:String -> a + b}
+    val lambda: (String, String) -> Int = {a: String, b:String -> a.length + b.length}
 
     //@Curry
     var _s = ""

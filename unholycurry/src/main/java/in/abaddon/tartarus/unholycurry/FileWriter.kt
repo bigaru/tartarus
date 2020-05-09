@@ -45,11 +45,42 @@ class FileWriter: WithHelper {
             .build()
     }
 
-    fun makeCurries(filer: Filer, methods: List<ExecutableElement>){
+    private fun makeCurriedLambda(element: VariableElement): FunSpec {
+        val type = element.asType().makeType() as ParameterizedTypeName
+
+        val params = type.typeArguments.dropLast(1).mapIndexed{idx, t -> idx to t}
+        val firstParam = params.first()
+        val tailParam = params.drop(1).reversed()
+        val initialReturnType = type.typeArguments.last()
+
+        val returnType = tailParam.map { t ->  ParameterSpec.builder("a${t.first}", t.second).build() }
+            .fold(initialReturnType) {acc, p ->
+            LambdaTypeName.get(returnType = acc, parameters = listOf(p))
+        }
+
+        val args = params.map{t -> "a${t.first}"}.reduce{acc, a -> "$acc, $a"}
+        val body = tailParam.fold("this.${element.simpleName}($args)"){acc, s ->
+            "{a${s.first} -> $acc}"
+        }
+
+        val classElement = element.enclosingElement as TypeElement
+
+        return FunSpec.builder(element.name())
+            .receiver(classElement.asType().makeType())
+            .addParameter(ParameterSpec.builder("a0", firstParam.second).build())
+            .returns(returnType)
+            .addStatement("return $body")
+            .build()
+    }
+
+    fun makeCurries(filer: Filer, methods: List<ExecutableElement>, lambdas: List<VariableElement>){
         // TODO produce in separate package / interface aka mixin
         val fileBuilder = FileSpec.builder("", "CurriedExtensions")
 
-        methods.map { makeCurriedMethod(it) }
+        methods.map(this::makeCurriedMethod)
+               .forEach { fileBuilder.addFunction(it) }
+
+        lambdas.map(this::makeCurriedLambda)
                .forEach { fileBuilder.addFunction(it) }
 
         fileBuilder.build().writeTo(filer)

@@ -1,5 +1,7 @@
 package `in`.abaddon.tartarus.unholycurry
 
+import com.squareup.kotlinpoet.ParameterizedTypeName
+import com.squareup.kotlinpoet.asTypeName
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.ExecutableElement
@@ -10,7 +12,7 @@ import javax.tools.Diagnostic
 @SupportedAnnotationTypes("in.abaddon.tartarus.unholycurry.Curry")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedOptions(CurryProcessor.KAPT_KOTLIN_GENERATED_OPTION_NAME)
-class CurryProcessor: AbstractProcessor(){
+class CurryProcessor: AbstractProcessor(), WithHelper{
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
     }
@@ -41,8 +43,17 @@ class CurryProcessor: AbstractProcessor(){
             ?.filterNot(this::isLambda)
             ?.forEach{error("${it.simpleName} is NOT a lambda")}
 
+        lambdas.forEach {
+            val tn = it.asType().makeType()
+            log("\n"+it)
+
+            if(tn is ParameterizedTypeName){
+                log("\n"+tn.typeArguments)
+            }
+        }
+
         if(methods.isNotEmpty()) {
-            fileWriter.makeCurries(processingEnv.filer, methods)
+            fileWriter.makeCurries(processingEnv.filer, methods, lambdas)
         }
 
         return true
