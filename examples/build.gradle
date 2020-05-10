@@ -15,6 +15,12 @@ application {
     mainClassName = "Main"
 }
 
+test {
+    afterTest { desc, result ->
+        logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+    }
+}
+
 dependencies {
     kapt project(":unholy-curry")
     compileOnly project(":unholy-curry")

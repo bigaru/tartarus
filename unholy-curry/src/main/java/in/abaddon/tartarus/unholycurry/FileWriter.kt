@@ -74,14 +74,9 @@ class FileWriter: WithHelper {
             .build()
     }
 
-    private fun getPackageName(classElement: TypeElement): String {
-        val lastIndex: Int = classElement.qualifiedName.toString().lastIndexOf('.')
+    private fun getPackageName(classElement: TypeElement): String =
+        classElement.qualifiedName.toString().substringBeforeLast('.',"")
 
-        return if (lastIndex != -1) {
-            classElement.qualifiedName.toString().substring(0, lastIndex)
-        }
-        else ""
-    }
 
     fun makeCurries(filer: Filer, methods: List<ExecutableElement>, lambdas: List<VariableElement>, logger: Messager){
         val curriedMethods = methods.groupBy { it.enclosingElement }
