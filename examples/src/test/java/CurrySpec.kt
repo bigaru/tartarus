@@ -1,7 +1,9 @@
+import com.examples.RiceCooker
+import com.examples.RiceCookerCurry
 import org.junit.Assert
 import org.junit.Test
 
-class MethodTests: TestFooCurry {
+class CurrySpec: TestFooCurry, RiceCookerCurry {
     @Test
     fun parametersWithMultiType() {
         val foo = TestFoo()
@@ -35,6 +37,33 @@ class MethodTests: TestFooCurry {
         val foo = TestFoo()
         val expected = foo.methodNestedGeneric( listOf(listOf("c")), listOf(listOf("u")) )
         val actual = foo.methodNestedGeneric( listOf(listOf("c")) )( listOf(listOf("u")) )
+
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun insidePackages() {
+        val foo = RiceCooker()
+        val expected = foo.cook("Jasmin", 200, listOf("pepper","onions"))
+        val actual = foo.cook("Jasmin")(200)(listOf("pepper","onions"))
+
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun lambda() {
+        val foo = RiceCooker()
+        val expected = foo.steamCook("potato", false)
+        val actual = foo.steamCook("potato")(false)
+
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun whenFirstTypeDifferentNoClash() {
+        val foo = RiceCooker()
+        val expected = foo.noClash("potato", 1)
+        val actual = foo.noClash("potato")(1)
 
         Assert.assertEquals(expected, actual)
     }

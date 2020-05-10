@@ -8,8 +8,14 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeMirror
+import javax.tools.Diagnostic
 
-class FileWriter: WithHelper {
+class FileWriter(
+    private val filer: Filer,
+    private val messager: Messager,
+    private val methods: List<ExecutableElement>,
+    private val lambdas: List<VariableElement>
+): WithHelper {
 
     private fun makeParam(p: VariableElement): ParameterSpec =
         ParameterSpec.builder(p.name(), p.asType().makeType()).build()
@@ -28,6 +34,18 @@ class FileWriter: WithHelper {
         ps.map{it.name()}
           .fold("this.${originalName}($args)") {acc, s -> "{$s -> $acc}"}
 
+    private fun checkForSignatureClash(classElement: TypeElement, element: Element, firstParamType: TypeName) {
+        val existsSignature = classElement.enclosedElements
+                                        .filterIsInstance<ExecutableElement>()
+                                        .filter { it.name() == element.name() }
+                                        .filter { it.parameters.size == 1}
+                                        .any { it.parameters[0].asType().makeType() == firstParamType }
+
+        if (existsSignature) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "'$element' cannot be curried because there is a signature clash")
+        }
+    }
+
     private fun cookMethodCurry(element: ExecutableElement): FunSpec {
         val firstParam = element.parameters.first()
         val tailParam = element.parameters.drop(1).reversed()
@@ -38,7 +56,8 @@ class FileWriter: WithHelper {
         val args = makeArgs(element.parameters)
         val body = makeBody(tailParam, element.name(), args)
 
-        // TODO check if Method Signature is already is used
+        checkForSignatureClash(classElement, element, firstParam.asType().makeType())
+
         return FunSpec.builder(element.name())
             .receiver(classElement.asType().makeType())
             .addParameter(makeParam(firstParam))
@@ -67,6 +86,8 @@ class FileWriter: WithHelper {
 
         val classElement = element.enclosingElement as TypeElement
 
+        checkForSignatureClash(classElement, element, firstParam.second)
+
         return FunSpec.builder(element.name())
             .receiver(classElement.asType().makeType())
             .addParameter(ParameterSpec.builder("a0", firstParam.second).build())
@@ -79,7 +100,7 @@ class FileWriter: WithHelper {
         classElement.qualifiedName.toString().substringBeforeLast('.',"")
 
 
-    fun makeCurries(filer: Filer, methods: List<ExecutableElement>, lambdas: List<VariableElement>, logger: Messager){
+    fun makeCurries(){
         val curriedMethods = methods.groupBy { it.enclosingElement }
                                     .mapValues { it.value.map(this::cookMethodCurry) }
 

@@ -15,8 +15,6 @@ class CurryProcessor: AbstractProcessor(), WithHelper{
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
     }
 
-    private val fileWriter = FileWriter()
-
     private fun log(msg: String){
         processingEnv.messager.printMessage(Diagnostic.Kind.WARNING, msg)
     }
@@ -46,7 +44,7 @@ class CurryProcessor: AbstractProcessor(), WithHelper{
         }
 
         if(methods.isNotEmpty() || lambdas.isNotEmpty()) {
-            fileWriter.makeCurries(processingEnv.filer, methods, lambdas, processingEnv.messager)
+            FileWriter(processingEnv.filer, processingEnv.messager, methods, lambdas).makeCurries()
         }
 
         return true
