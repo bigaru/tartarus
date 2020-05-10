@@ -1,9 +1,8 @@
-import com.examples.RiceCooker
-import com.examples.RiceCookerCurry
+import com.examples.*
 import org.junit.Assert
 import org.junit.Test
 
-class CurrySpec: TestFooCurry, RiceCookerCurry {
+class CurrySpec: TestFooCurry, RiceCookerCurry, PrimarySpiceCurry, SecondarySpiceCurry {
     @Test
     fun parametersWithMultiType() {
         val foo = TestFoo()
@@ -64,6 +63,22 @@ class CurrySpec: TestFooCurry, RiceCookerCurry {
         val foo = RiceCooker()
         val expected = foo.noClash("potato", 1)
         val actual = foo.noClash("potato")(1)
+
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun primaryCtor() {
+        val expected = PrimarySpice(3, "Herb", 40.0)
+        val actual = createPrimarySpice(3)("Herb")(40.0)
+
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun secondaryCtor() {
+        val expected = SecondarySpice(3, "Herb", 40.0)
+        val actual = createSecondarySpice(3)("Herb")(40.0)
 
         Assert.assertEquals(expected, actual)
     }

@@ -11,7 +11,7 @@ import javax.tools.Diagnostic
 @SupportedAnnotationTypes("in.abaddon.tartarus.unholycurry.Curry")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedOptions(CurryProcessor.KAPT_KOTLIN_GENERATED_OPTION_NAME)
-class CurryProcessor: AbstractProcessor(), WithHelper{
+class CurryProcessor: AbstractProcessor() {
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
     }
@@ -47,11 +47,8 @@ class CurryProcessor: AbstractProcessor(), WithHelper{
             ?.filterNot(this::isLambda)
             ?.forEach{error("${it.simpleName} is NOT a lambda")}
 
-        ctors.forEach {
-           log("\n "+it + " " + it.kind)
-        }
 
-        if(methods.isNotEmpty() || lambdas.isNotEmpty()) {
+        if(methods.isNotEmpty() || lambdas.isNotEmpty() || ctors.isNotEmpty()) {
             FileWriter(processingEnv.filer, processingEnv.messager, methods, lambdas, ctors).makeCurries()
         }
 

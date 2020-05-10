@@ -7,7 +7,6 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
-import javax.lang.model.type.TypeMirror
 import javax.tools.Diagnostic
 
 class FileWriter(
@@ -87,6 +86,27 @@ class FileWriter(
             .build()
     }
 
+    private fun cookCtorCurry(element: ExecutableElement): FunSpec {
+        val firstParam = element.parameters.first()
+        val tailParam = element.parameters.drop(1).reversed()
+
+        val classElement = element.enclosingElement as TypeElement
+        val returnType = tailParam.map(this::makeParam).fold(classElement.asType().makeType()) {acc, p ->
+            LambdaTypeName.get(returnType = acc, parameters = listOf(p))
+        }
+
+        val args = element.parameters.map{it.name()}.reduce{acc, a -> "$acc, $a"}
+        val body = tailParam.map{it.name()}.fold("${classElement.name()}($args)") { acc, s ->
+            "{$s -> $acc}"
+        }
+
+        return FunSpec.builder("create${classElement.name()}")
+            .addParameter(makeParam(firstParam))
+            .returns(returnType)
+            .addStatement("return $body")
+            .build()
+    }
+
     private fun getPackageName(classElement: TypeElement): String =
         classElement.qualifiedName.toString().substringBeforeLast('.',"")
 
@@ -98,12 +118,16 @@ class FileWriter(
         val curriedLambdas = lambdas.groupBy { it.enclosingElement }
                                     .mapValues { it.value.map(this::cookLambdaCurry) }
 
-        val keys = curriedMethods.keys + curriedLambdas.keys
+        val curriedCtors = ctors.groupBy { it.enclosingElement }
+                                .mapValues { it.value.map(this::cookCtorCurry) }
+
+        val keys = curriedMethods.keys + curriedLambdas.keys + curriedCtors.keys
 
         keys.map {
             val m = curriedMethods[it] ?: emptyList()
             val l = curriedLambdas[it] ?: emptyList()
-            it to (m+l)
+            val c = curriedCtors[it] ?: emptyList()
+            it to (m+l+c)
         }
         .map(this::makeInterface)
         .forEach { it.writeTo(filer) }
