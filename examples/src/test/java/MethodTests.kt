@@ -1,7 +1,7 @@
 import org.junit.Assert
 import org.junit.Test
 
-class MethodTests: TestFooCurried {
+class MethodTests: TestFooCurry {
     @Test
     fun givenMultiType() {
         val foo = TestFoo()

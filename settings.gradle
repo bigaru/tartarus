@@ -1,4 +1,4 @@
 rootProject.name = 'tartarus'
-include 'unholycurry'
+include 'unholy-curry'
 include 'examples'
 

@@ -1,7 +1,5 @@
 package `in`.abaddon.tartarus.unholycurry
 
-import com.squareup.kotlinpoet.ParameterizedTypeName
-import com.squareup.kotlinpoet.asTypeName
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.ExecutableElement

@@ -99,7 +99,7 @@ class FileWriter: WithHelper {
         }
         .forEach {
             val packageName = getPackageName(it.first as TypeElement)
-            val interfaceName = "${it.first.name()}Curried"
+            val interfaceName = "${it.first.name()}Curry"
             val interfaceSpec = TypeSpec.interfaceBuilder(interfaceName)
 
             it.second.forEach { interfaceSpec.addFunction(it) }

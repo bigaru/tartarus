@@ -16,8 +16,8 @@ application {
 }
 
 dependencies {
-    kapt project(":unholycurry")
-    compileOnly project(":unholycurry")
+    kapt project(":unholy-curry")
+    compileOnly project(":unholy-curry")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'junit:junit:4.12'
