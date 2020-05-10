@@ -2,6 +2,7 @@ package `in`.abaddon.tartarus.unholycurry
 
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
@@ -28,10 +29,17 @@ class CurryProcessor: AbstractProcessor(), WithHelper{
 
         val methods = elements
                         ?.filterIsInstance<ExecutableElement>()
+                        ?.filter { it.kind == ElementKind.METHOD }
                         ?: emptyList()
+
         val lambdas = elements
                         ?.filterIsInstance<VariableElement>()
                         ?.filter(this::isLambda)
+                        ?: emptyList()
+
+        val ctors = elements
+                        ?.filterIsInstance<ExecutableElement>()
+                        ?.filter { it.kind == ElementKind.CONSTRUCTOR }
                         ?: emptyList()
 
         elements
@@ -39,12 +47,12 @@ class CurryProcessor: AbstractProcessor(), WithHelper{
             ?.filterNot(this::isLambda)
             ?.forEach{error("${it.simpleName} is NOT a lambda")}
 
-        methods.forEach {
-           // log("\n "+it)
+        ctors.forEach {
+           log("\n "+it + " " + it.kind)
         }
 
         if(methods.isNotEmpty() || lambdas.isNotEmpty()) {
-            FileWriter(processingEnv.filer, processingEnv.messager, methods, lambdas).makeCurries()
+            FileWriter(processingEnv.filer, processingEnv.messager, methods, lambdas, ctors).makeCurries()
         }
 
         return true

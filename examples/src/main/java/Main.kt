@@ -3,7 +3,7 @@ import `in`.abaddon.tartarus.unholycurry.Curry
 object Main: FooCurry {
     @JvmStatic
     fun main(args: Array<String>) {
-        val foo = Foo()
+        val foo = Foo("", 2)
         foo.uncurried("a",2, emptyList(), false, 2.0)
         foo.uncurried("a")(2)(emptyList())(false)( 2.0)
 
@@ -12,7 +12,12 @@ object Main: FooCurry {
     }
 }
 
-class Foo(){
+class Foo {
+
+    @Curry
+    constructor(a: String, b: Int) {}
+
+
     @Curry
     val lambda: (String, String) -> Int = {a: String, b:String -> a.length + b.length}
 

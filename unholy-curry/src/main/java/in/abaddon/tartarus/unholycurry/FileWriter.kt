@@ -14,25 +14,12 @@ class FileWriter(
     private val filer: Filer,
     private val messager: Messager,
     private val methods: List<ExecutableElement>,
-    private val lambdas: List<VariableElement>
+    private val lambdas: List<VariableElement>,
+    private val ctors: List<ExecutableElement>
 ): WithHelper {
 
     private fun makeParam(p: VariableElement): ParameterSpec =
         ParameterSpec.builder(p.name(), p.asType().makeType()).build()
-
-    private fun makeReturnType(initialReturnType: TypeMirror, params: List<VariableElement>): TypeName =
-        params.map(this::makeParam)
-              .fold(initialReturnType.makeType()) {acc, p ->
-                     LambdaTypeName.get(returnType = acc, parameters = listOf(p))
-              }
-
-    private fun makeArgs(ps: List<VariableElement>): String =
-        ps.map{it.name()}
-          .reduce{acc, a -> "$acc, $a"}
-
-    private fun makeBody(ps: List<VariableElement>, originalName: String, args: String): String =
-        ps.map{it.name()}
-          .fold("this.${originalName}($args)") {acc, s -> "{$s -> $acc}"}
 
     private fun checkForSignatureClash(classElement: TypeElement, element: Element, firstParamType: TypeName) {
         val existsSignature = classElement.enclosedElements
@@ -51,10 +38,14 @@ class FileWriter(
         val tailParam = element.parameters.drop(1).reversed()
 
         val classElement = element.enclosingElement as TypeElement
-        val returnType = makeReturnType(element.returnType, tailParam)
+        val returnType = tailParam.map(this::makeParam).fold(element.returnType.makeType()) {acc, p ->
+                LambdaTypeName.get(returnType = acc, parameters = listOf(p))
+        }
 
-        val args = makeArgs(element.parameters)
-        val body = makeBody(tailParam, element.name(), args)
+        val args = element.parameters.map{it.name()}.reduce{acc, a -> "$acc, $a"}
+        val body = tailParam.map{it.name()}.fold("this.${element.name()}($args)") { acc, s ->
+            "{$s -> $acc}"
+        }
 
         checkForSignatureClash(classElement, element, firstParam.asType().makeType())
 
