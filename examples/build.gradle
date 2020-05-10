@@ -3,7 +3,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'application'
 
 group 'in.abaddon.tartarus'
-version '1.0.0-SNAPSHOT'
+version '0.0.1'
 
 sourceCompatibility = 1.7
 

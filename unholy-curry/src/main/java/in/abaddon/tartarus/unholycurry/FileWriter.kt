@@ -3,6 +3,7 @@ package `in`.abaddon.tartarus.unholycurry
 import com.squareup.kotlinpoet.*
 import javax.annotation.processing.Filer
 import javax.annotation.processing.Messager
+import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
@@ -92,17 +93,19 @@ class FileWriter: WithHelper {
             val l = curriedLambdas[it] ?: emptyList()
             it to (m+l)
         }
-        .forEach {
-            val packageName = getPackageName(it.first as TypeElement)
-            val interfaceName = "${it.first.name()}Curry"
-            val interfaceSpec = TypeSpec.interfaceBuilder(interfaceName)
+        .map(this::makeInterface)
+        .forEach { it.writeTo(filer) }
+    }
 
-            it.second.forEach { interfaceSpec.addFunction(it) }
+    private fun makeInterface(pair: Pair<Element, List<FunSpec>>): FileSpec{
+        val packageName = getPackageName(pair.first as TypeElement)
+        val interfaceName = "${pair.first.name()}Curry"
+        val interfaceSpec = TypeSpec.interfaceBuilder(interfaceName)
 
-            FileSpec.builder(packageName, interfaceName)
-                .addType(interfaceSpec.build())
-                .build()
-                .writeTo(filer)
-        }
+        pair.second.forEach { interfaceSpec.addFunction(it) }
+
+        return FileSpec.builder(packageName, interfaceName)
+            .addType(interfaceSpec.build())
+            .build()
     }
 }
