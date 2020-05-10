@@ -3,7 +3,7 @@ import org.junit.Test
 
 class MethodTests: TestFooCurry {
     @Test
-    fun givenMultiType() {
+    fun parametersWithMultiType() {
         val foo = TestFoo()
         val bar = Bar()
         val expected = foo.methodMultiTypes(1, 2.5, false, bar)
@@ -13,7 +13,7 @@ class MethodTests: TestFooCurry {
     }
 
     @Test
-    fun givenStrings() {
+    fun parametersWithStrings() {
         val foo = TestFoo()
         val expected = foo.methodStrings("cur","ry")
         val actual = foo.methodStrings("cur")("ry")
@@ -22,7 +22,7 @@ class MethodTests: TestFooCurry {
     }
 
     @Test
-    fun givenGeneric() {
+    fun parametersWithGeneric() {
         val foo = TestFoo()
         val expected = foo.methodGeneric(listOf("c"), listOf("u"))
         val actual = foo.methodGeneric(listOf("c"))(listOf("u"))
@@ -31,7 +31,7 @@ class MethodTests: TestFooCurry {
     }
 
     @Test
-    fun givenNestedGeneric() {
+    fun parametersWithNestedGeneric() {
         val foo = TestFoo()
         val expected = foo.methodNestedGeneric( listOf(listOf("c")), listOf(listOf("u")) )
         val actual = foo.methodNestedGeneric( listOf(listOf("c")) )( listOf(listOf("u")) )

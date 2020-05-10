@@ -5,7 +5,7 @@ import org.junit.Test
 
 class LambdaTests: RiceCookerCurry {
     @Test
-    fun givenLambda() {
+    fun lambda() {
         val foo = RiceCooker()
         val expected = foo.steamCook("potato", false)
         val actual = foo.steamCook("potato")(false)

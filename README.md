@@ -5,14 +5,14 @@
 
 ### Gradle Setup
 ```groovy
-    repositories {
-        ...
-        maven { url 'https://jitpack.io' }
-    }
+repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+}
 
-	dependencies {
-	        implementation 'in.abaddon.tartarus:unholy-curry:0.0.1'
-	}
+dependencies {
+    implementation 'in.abaddon.tartarus:unholy-curry:0.0.1'
+}
 
 ```
 

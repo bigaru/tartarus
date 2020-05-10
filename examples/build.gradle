@@ -1,6 +1,7 @@
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'application'
+apply plugin: 'com.adarshr.test-logger'
 
 group 'in.abaddon.tartarus'
 version '0.0.2-SNAPSHOT'
@@ -15,11 +16,6 @@ application {
     mainClassName = "Main"
 }
 
-test {
-    afterTest { desc, result ->
-        logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
-    }
-}
 
 dependencies {
     kapt project(":unholy-curry")
