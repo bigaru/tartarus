@@ -1,6 +1,7 @@
 import `in`.abaddon.tartarus.unholycurry.Curry
+import curry.*
 
-object Main: FooCurry {
+object Main {
     @JvmStatic
     fun main(args: Array<String>) {
         var foo = Foo("", 2,4, true)

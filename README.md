@@ -14,16 +14,20 @@ repositories {
 }
 
 dependencies {
-    kapt 'in.abaddon.tartarus:unholy-curry:0.0.2'
-    compileOnly 'in.abaddon.tartarus:unholy-curry:0.0.2'
+    kapt 'in.abaddon.tartarus:unholy-curry:0.0.3'
+    compileOnly 'in.abaddon.tartarus:unholy-curry:0.0.3'
 }
 ```
 
 ### Example
 1. annotate function/lambda/constructor with `@Curry`
-2. use the generated mixin interface with `-Curry` suffix
+2. import subpackage `curry`
 3. have fun ;)
 ```kotlin
+package com.example.foo
+
+import com.example.foo.curry.*
+
 class Spice
 @Curry constructor(val name: String, val color: Int, hotness: Int) {
 
@@ -34,7 +38,7 @@ class Spice
     fun mitigate(drink: String, quantity: Int, degree: Int): Int { ... }
 }
 
-object MainObj: SpiceCurry {
+object MainObj {
     fun doSomething() {
         val s1 = Spice("GhostPepper",0xF00,1000000)
         s1.enhance(2.5, 50, 90)

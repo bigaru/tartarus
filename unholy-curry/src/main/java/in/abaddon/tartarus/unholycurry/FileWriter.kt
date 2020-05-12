@@ -7,7 +7,6 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
-import javax.tools.Diagnostic
 
 class FileWriter(
     private val filer: Filer,
@@ -16,21 +15,21 @@ class FileWriter(
     private val lambdas: List<VariableElement>,
     private val ctors: List<ExecutableElement>
 ): WithHelper {
-    private fun getPackageName(classElement: TypeElement): String =
-        classElement.qualifiedName.toString().substringBeforeLast('.',"")
+    private fun getPackageName(classElement: Element): String =
+        (classElement as TypeElement).qualifiedName.toString().substringBeforeLast('.',"")
 
     private fun methodRecipe(v: ExecutableElement): FunSpec = MethodRecipe(v, messager).cookFunction()
     private fun lambdaRecipe(v: VariableElement): FunSpec = LambdaRecipe(v, messager).cookFunction()
     private fun constructorRecipe(v: ExecutableElement): FunSpec = ConstructorRecipe(v, messager).cookFunction()
 
     fun makeCurries(){
-        val curriedMethods = methods.groupBy { it.enclosingElement }
+        val curriedMethods = methods.groupBy { getPackageName(it.enclosingElement) }
                                     .mapValues { it.value.map(this::methodRecipe) }
 
-        val curriedLambdas = lambdas.groupBy { it.enclosingElement }
+        val curriedLambdas = lambdas.groupBy { getPackageName(it.enclosingElement) }
                                     .mapValues { it.value.map(this::lambdaRecipe) }
 
-        val curriedCtors = ctors.groupBy { it.enclosingElement }
+        val curriedCtors = ctors.groupBy { getPackageName(it.enclosingElement) }
                                 .mapValues { it.value.map(this::constructorRecipe) }
 
         val keys = curriedMethods.keys + curriedLambdas.keys + curriedCtors.keys
@@ -41,19 +40,17 @@ class FileWriter(
             val c = curriedCtors[it] ?: emptyList()
             it to (m+l+c)
         }
-        .map(this::makeInterface)
+        .map(this::makeFile)
         .forEach { it.writeTo(filer) }
     }
 
-    private fun makeInterface(pair: Pair<Element, List<FunSpec>>): FileSpec{
-        val packageName = getPackageName(pair.first as TypeElement)
-        val interfaceName = "${pair.first.name()}Curry"
-        val interfaceSpec = TypeSpec.interfaceBuilder(interfaceName)
+    private fun makeFile(pair: Pair<String, List<FunSpec>>): FileSpec{
+        val packageName = "${if(pair.first.length == 0) "" else pair.first + "."}curry"
+        val interfaceName = "CurryFns"
 
-        pair.second.forEach { interfaceSpec.addFunction(it) }
+        val fileSpec = FileSpec.builder(packageName, interfaceName)
+        pair.second.forEach { fileSpec.addFunction(it) }
 
-        return FileSpec.builder(packageName, interfaceName)
-            .addType(interfaceSpec.build())
-            .build()
+        return fileSpec.build()
     }
 }

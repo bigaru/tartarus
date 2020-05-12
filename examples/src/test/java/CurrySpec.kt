@@ -1,8 +1,10 @@
 import com.examples.*
 import org.junit.Assert
 import org.junit.Test
+import curry.*
+import com.examples.curry.*
 
-class CurrySpec: TestFooCurry, RiceCookerCurry, PrimarySpiceCurry, SecondarySpiceCurry {
+class CurrySpec {
     @Test
     fun parametersWithMultiType() {
         val foo = TestFoo()
