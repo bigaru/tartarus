@@ -33,7 +33,7 @@ class LambdaRecipe(messager: Messager): Recipe<VariableElement>(messager) {
         val tailParam = (0..params.size-1).drop(1).reversed()
         val args = (0..params.size-1).map{idx -> "a${idx}"}.reduce{acc, a -> "$acc, $a"}
 
-        val body = tailParam.fold("this.${prepName()}($args)"){acc, idx ->
+        val body = tailParam.fold("this.${element.name()}($args)"){acc, idx ->
             "{a${idx} -> $acc}"
         }
 

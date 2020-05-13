@@ -5,24 +5,24 @@ object Main {
     @JvmStatic
     fun main(args: Array<String>) {
         var foo = Foo("", 2,4, true)
-        foo = createFoo("a")(5)(4)(false)
+        foo = Mooo("a")(5)(4)(false)
 
 
         foo.uncurried("a",2, emptyList(), false, 2.0)
-        foo.uncurried("a")(2)(emptyList())(false)( 2.0)
+        foo.superC("a")(2)(emptyList())(false)( 2.0)
 
         foo.lambda("a","b")
-        foo.lambda("a")("b")
+        foo.lamma("a")("b")
     }
 }
 
 class Foo {
 
-    @Curry
+    @Curry(name = "Mooo", order = intArrayOf(2,0,1) )
     constructor(a: String, b: Int, c: Int, d: Boolean) {}
 
 
-    @Curry
+    @Curry(name = "lamma" )
     val lambda: (String, String) -> Int = {a: String, b:String -> a.length + b.length}
 
     //@Curry
@@ -32,7 +32,7 @@ class Foo {
         get() = _s
         set(value){_s = value}
 
-    @Curry
+    @Curry(name = "superC" )
     fun uncurried(a: String, b: Int, c: List<List<String>>, d: Boolean, e: Double){
         println("->>> $a $b $c $d $e <<<-")
     }

@@ -12,7 +12,16 @@ import javax.tools.Diagnostic
 abstract class Recipe<T: Element>(val messager: Messager): WithHelper {
     lateinit var element: T
 
-    open fun prepName(): String = element.name()
+    open fun prepDefaultName(): String = element.name()
+
+    fun prepName(): String {
+        val customName = getAttributeValue(element, "name")
+
+        if(customName != null) return customName.value.toString()
+
+        return prepDefaultName()
+    }
+
     open fun prepReceiver(): TypeName? = element.enclosingElement.asType().makeType()
 
     abstract fun initElement(newElement: T)

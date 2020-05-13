@@ -18,7 +18,7 @@ class ConstructorRecipe(messager: Messager): Recipe<ExecutableElement>(messager)
         classElement = element.enclosingElement as TypeElement
     }
 
-    override fun prepName(): String =
+    override fun prepDefaultName(): String =
         "create${classElement.name()}"
 
     override fun prepReceiver(): TypeName? = null
