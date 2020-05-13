@@ -7,11 +7,12 @@ import com.squareup.kotlinpoet.TypeName
 import javax.annotation.processing.Messager
 import javax.lang.model.element.VariableElement
 
-class LambdaRecipe(element: VariableElement, messager: Messager): Recipe(element, messager) {
-    val originallambdaType: ParameterizedTypeName
-    val params: List<TypeName>
+class LambdaRecipe(messager: Messager): Recipe<VariableElement>(messager) {
+    lateinit var originallambdaType: ParameterizedTypeName
+    lateinit var params: List<TypeName>
 
-    init {
+    override fun initElement(newElement: VariableElement) {
+        element = newElement
         originallambdaType = element.asType().makeType() as ParameterizedTypeName
         params = originallambdaType.typeArguments.dropLast(1)
     }

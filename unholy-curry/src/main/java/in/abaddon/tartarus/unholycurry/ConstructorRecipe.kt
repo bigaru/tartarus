@@ -8,11 +8,12 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 
-class ConstructorRecipe(element: ExecutableElement, messager: Messager): Recipe(element, messager) {
-    val params: List<VariableElement>
-    val classElement: TypeElement
+class ConstructorRecipe(messager: Messager): Recipe<ExecutableElement>(messager) {
+    lateinit var params: List<VariableElement>
+    lateinit var classElement: TypeElement
 
-    init {
+    override fun initElement(newElement: ExecutableElement) {
+        element = newElement
         params = element.parameters
         classElement = element.enclosingElement as TypeElement
     }

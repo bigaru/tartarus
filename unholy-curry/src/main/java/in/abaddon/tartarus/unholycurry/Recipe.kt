@@ -9,17 +9,20 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
-abstract class Recipe(val el: Element, val messager: Messager): WithHelper {
-    open fun prepName(): String = el.name()
+abstract class Recipe<T: Element>(val messager: Messager): WithHelper {
+    lateinit var element: T
 
-    open fun prepReceiver(): TypeName? = el.enclosingElement.asType().makeType()
+    open fun prepName(): String = element.name()
+    open fun prepReceiver(): TypeName? = element.enclosingElement.asType().makeType()
 
+    abstract fun initElement(newElement: T)
     abstract fun prepFirstParam(): ParameterSpec
     abstract fun prepReturnType(): TypeName
     abstract fun prepBody(): String
 
-    fun cookFunction(): FunSpec {
-        checkForSignatureClash(el.enclosingElement as TypeElement, el, prepFirstParam().type)
+    fun cookFunction(newElement: T): FunSpec {
+        initElement(newElement)
+        checkForSignatureClash(element.enclosingElement as TypeElement, element, prepFirstParam().type)
 
         val fn = FunSpec.builder(prepName())
                         .addParameter(prepFirstParam())

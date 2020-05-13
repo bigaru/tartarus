@@ -7,8 +7,13 @@ import javax.annotation.processing.Messager
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.VariableElement
 
-class MethodRecipe(val element: ExecutableElement, messager: Messager): Recipe(element, messager) {
-    val params: List<VariableElement> by lazy { element.parameters }
+class MethodRecipe(messager: Messager): Recipe<ExecutableElement>(messager) {
+    lateinit var params: List<VariableElement>
+
+    override fun initElement(newElement: ExecutableElement) {
+        element = newElement
+        params = element.parameters
+    }
 
     override fun prepFirstParam(): ParameterSpec =
         makeParam(params.first())

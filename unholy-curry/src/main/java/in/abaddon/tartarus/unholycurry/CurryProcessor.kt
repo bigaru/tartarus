@@ -32,7 +32,7 @@ class CurryProcessor: AbstractProcessor() {
             .forEach{error("${it.simpleName} is NOT a lambda")}
 
         if(elements.isNotEmpty()) {
-            FileWriter(processingEnv.filer, processingEnv.messager, elements).makeCurries()
+            FilePan(processingEnv.filer, processingEnv.messager, elements).makeCurries()
         }
 
         return true
