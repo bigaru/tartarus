@@ -9,32 +9,37 @@ import javax.lang.model.element.VariableElement
 
 class LambdaRecipe(messager: Messager): Recipe<VariableElement>(messager) {
     lateinit var originallambdaType: ParameterizedTypeName
-    lateinit var params: List<TypeName>
+    lateinit var params: List<Pair<String,TypeName>>
 
     override fun initElement(newElement: VariableElement) {
         element = newElement
         originallambdaType = element.asType().makeType() as ParameterizedTypeName
-        params = originallambdaType.typeArguments.dropLast(1)
+
+        val ps = originallambdaType.typeArguments.dropLast(1)
+                                                 .mapIndexed{idx, type -> "a$idx" to type}
+        params = reorder(ps)
     }
 
-    override fun prepFirstParam(): ParameterSpec =
-        ParameterSpec("a0", params.first())
+    override fun prepFirstParam(): ParameterSpec {
+      val (idx, t) = params.first()
+      return ParameterSpec(idx, t)
+    }
 
     override fun prepReturnType(): TypeName {
         val initialReturnType = originallambdaType.typeArguments.last()
         val tailParam = params.drop(1).reversed()
 
-        return tailParam.fold(initialReturnType) {acc, p ->
+        return tailParam.map{it.second}.fold(initialReturnType) {acc, p ->
             LambdaTypeName.get(returnType = acc, parameters = *arrayOf(p))
         }
     }
 
     override fun prepBody(): String {
-        val tailParam = (0..params.size-1).drop(1).reversed()
+        val tailParam = params.drop(1).map{it.first}.reversed()
         val args = (0..params.size-1).map{idx -> "a${idx}"}.reduce{acc, a -> "$acc, $a"}
 
         val body = tailParam.fold("this.${element.name()}($args)"){acc, idx ->
-            "{a${idx} -> $acc}"
+            "{${idx} -> $acc}"
         }
 
         return "return $body"

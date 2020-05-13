@@ -12,7 +12,7 @@ class MethodRecipe(messager: Messager): Recipe<ExecutableElement>(messager) {
 
     override fun initElement(newElement: ExecutableElement) {
         element = newElement
-        params = element.parameters
+        params = reorder(element.parameters)
     }
 
     override fun prepFirstParam(): ParameterSpec =
@@ -28,7 +28,7 @@ class MethodRecipe(messager: Messager): Recipe<ExecutableElement>(messager) {
 
     override fun prepBody(): String {
         val tailParam = params.drop(1).reversed()
-        val args = params.map{it.name()}.reduce{acc, a -> "$acc, $a"}
+        val args = element.parameters.map{it.name()}.reduce{acc, a -> "$acc, $a"}
 
         val body = tailParam.map{it.name()}.fold("this.${element.name()}($args)") { acc, s ->
             "{$s -> $acc}"

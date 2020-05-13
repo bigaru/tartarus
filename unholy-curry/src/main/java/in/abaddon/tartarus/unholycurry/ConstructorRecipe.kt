@@ -14,7 +14,7 @@ class ConstructorRecipe(messager: Messager): Recipe<ExecutableElement>(messager)
 
     override fun initElement(newElement: ExecutableElement) {
         element = newElement
-        params = element.parameters
+        params = reorder(element.parameters)
         classElement = element.enclosingElement as TypeElement
     }
 
@@ -36,7 +36,7 @@ class ConstructorRecipe(messager: Messager): Recipe<ExecutableElement>(messager)
 
     override fun prepBody(): String {
         val tailParam = params.drop(1).reversed()
-        val args = params.map{it.name()}.reduce{acc, a -> "$acc, $a"}
+        val args = element.parameters.map{it.name()}.reduce{acc, a -> "$acc, $a"}
 
         val body = tailParam.map{it.name()}.fold("${classElement.name()}($args)") { acc, s ->
             "{$s -> $acc}"

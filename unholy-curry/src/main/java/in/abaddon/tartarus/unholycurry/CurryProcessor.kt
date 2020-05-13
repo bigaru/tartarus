@@ -1,13 +1,9 @@
 package `in`.abaddon.tartarus.unholycurry
 
-import com.squareup.kotlinpoet.ANNOTATION
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
-import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
-import javax.lang.model.element.AnnotationMirror
-
 import javax.tools.Diagnostic
 
 @SupportedAnnotationTypes(CurryProcessor.ANNOTATION_PACKAGE)
@@ -29,21 +25,6 @@ class CurryProcessor: AbstractProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         val elements = roundEnv.getElementsAnnotatedWith(Curry::class.java).toList()
-        
-//        elements.forEach {
-//            val annotationMirrors = it.annotationMirrors.filter{ it.annotationType.toString() == ANNOTATION_PACKAGE}
-//
-//            val names = annotationMirrors.flatMap{
-//                it.elementValues.filterKeys { it.simpleName.contentEquals("name") }.values
-//            }
-//
-//            val i = annotationMirrors.flatMap{it.elementValues.entries}
-//                .filter{it.key.simpleName.contentEquals("name")}
-//                .map{it.value}
-//
-//
-//            names.forEach{log("iii" + i)}
-//        }
 
         elements
             .filterIsInstance<VariableElement>()

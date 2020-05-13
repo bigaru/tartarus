@@ -14,6 +14,24 @@ abstract class Recipe<T: Element>(val messager: Messager): WithHelper {
 
     open fun prepDefaultName(): String = element.name()
 
+    fun <E>reorder(input: List<E>): List<E> {
+        val customOrder = getAttributeValue(element, "order")
+        if(customOrder == null) return input
+
+        val attributedOrder = (customOrder.value as List<*>).map{ Integer.parseInt(it.toString()) }
+
+        (0..input.size - 1).forEach { idx ->
+            if(!attributedOrder.any{ it == idx }) {
+                messager.printMessage(Diagnostic.Kind.ERROR, "missing index $idx in order")
+            }
+        }
+
+        val newOrder = mutableListOf<E>()
+        attributedOrder.forEach { newOrder.add(input[it]) }
+
+        return newOrder
+    }
+
     fun prepName(): String {
         val customName = getAttributeValue(element, "name")
 

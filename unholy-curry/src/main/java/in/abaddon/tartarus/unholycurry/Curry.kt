@@ -4,5 +4,5 @@ package `in`.abaddon.tartarus.unholycurry
 @Retention(AnnotationRetention.BINARY)
 annotation class Curry(
     val name: String = "",
-    val order: IntArray = intArrayOf()
+    vararg val order: Int = intArrayOf()
 )
