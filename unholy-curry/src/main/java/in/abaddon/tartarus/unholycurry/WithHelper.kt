@@ -3,12 +3,16 @@ package `in`.abaddon.tartarus.unholycurry
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import javax.lang.model.element.Element
+import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeMirror
 import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
 import kotlin.reflect.jvm.internal.impl.name.FqName
 
 interface WithHelper {
+
+    fun getPackageName(classElement: TypeElement): String =
+        classElement.qualifiedName.toString().substringBeforeLast('.',"")
 
     fun makeParam(p: VariableElement): ParameterSpec =
         ParameterSpec(p.name(), p.asType().makeType())
