@@ -2,6 +2,7 @@
 
 ## unholy-curry
 [![Release](https://jitpack.io/v/in.abaddon/tartarus.svg)](https://jitpack.io/#in.abaddon/tartarus)
+[![Build Status](https://travis-ci.org/bigaru/tartarus.svg?branch=master)](https://travis-ci.org/bigaru/tartarus)
 
 Enables currying for function/lambda/constructor
 
