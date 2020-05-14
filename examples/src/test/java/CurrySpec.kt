@@ -84,4 +84,22 @@ class CurrySpec {
 
         Assert.assertEquals(expected, actual)
     }
+
+    @Test
+    fun renameCurriedFn(){
+        val hotPepper = HotPepper()
+        val expected = hotPepper.burn("Victim's Name", 20000, 0xFF0)
+        val actual = hotPepper.ignite("Victim's Name")(20000)(0xFF0)
+
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun reorderParams(){
+        val hotPepper = HotPepper()
+        val expected = hotPepper.killBacteria("bacteriaXZN", 0.4, 'C')
+        val actual = hotPepper.killBacteria('C')(0.4)("bacteriaXZN")
+
+        Assert.assertEquals(expected, actual)
+    }
 }
